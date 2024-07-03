@@ -1,113 +1,146 @@
-import Image from "next/image";
+'use client'; // 确保在文件顶部
+
+import { useState, useEffect } from 'react';
+import dayjs from 'dayjs'; // 用于日期处理
+import isoWeek from 'dayjs/plugin/isoWeek'; // 插件用于处理ISO周
+dayjs.extend(isoWeek);
 
 export default function Home() {
+  const [theme, setTheme] = useState('light');
+  const [projectName, setProjectName] = useState(''); // 项目名称状态
+  const [startDate, setStartDate] = useState(dayjs('2024-07-03')); // 项目开始日期状态
+  const [endDate, setEndDate] = useState(dayjs('2024-07-09')); // 项目结束日期状态
+
+  // 切换主题
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
+
+  // 获取周一日期
+  const getMonday = (date) => {
+    return date.isoWeekday(1);
+  };
+
+  // 生成从startDate到endDate的日期，并按周分组
+  const generateDates = (start, end) => {
+    const dates = [];
+    let currentDate = getMonday(start); // 从周一开始
+
+    let week = [];
+
+    while (currentDate.isBefore(end) || currentDate.isSame(end)) {
+      week.push(currentDate.format('YYYY/MM/DD'));
+      if (week.length === 7) {
+        dates.push(week);
+        week = [];
+      }
+      currentDate = currentDate.add(1, 'day');
+    }
+
+    if (week.length > 0) {
+      dates.push(week);
+    }
+
+    return dates;
+  };
+
+  const daysOfWeek = ['Mon', 'Tues', 'Wed', 'Thus', 'Fri', 'Sat', 'Sun'];
+  const dates = generateDates(startDate, endDate);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+    <div className="min-h-screen flex flex-col border border-black dark:border-white">
+      <div className="flex justify-between p-4 border-b border-black dark:border-white">
+        <div className="flex space-x-4">
+          <div>
+            <label htmlFor="projectName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Project Name:
+            </label>
+            <input
+              type="text"
+              id="projectName"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
-          </a>
+          </div>
+          <div>
+            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Start Date:
+            </label>
+            <input
+              type="date"
+              id="startDate"
+              value={startDate.format('YYYY-MM-DD')}
+              onChange={(e) => setStartDate(dayjs(e.target.value))}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+          <div>
+            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              End Date:
+            </label>
+            <input
+              type="date"
+              id="endDate"
+              value={endDate.format('YYYY-MM-DD')}
+              onChange={(e) => setEndDate(dayjs(e.target.value))}
+              className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+        </div>
+        <div className="flex space-x-2">
+          <button className="px-4 py-2 border border-black dark:border-white">Import</button>
+          <button className="px-4 py-2 border border-black dark:border-white">Export</button>
+          <button onClick={toggleTheme} className="px-4 py-2 border border-black dark:border-white">
+            {theme === 'light' ? 'Switch to Dark' : 'Switch to Light'}
+          </button>
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      <div className="flex flex-1">
+        <div className="flex-1 border-r border-black dark:border-white p-4">
+          <table className="table-auto w-full border border-black dark:border-white">
+            <thead>
+              <tr>
+                {daysOfWeek.map(day => (
+                  <th key={day} className="px-4 py-2 border border-black dark:border-white">{day}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {dates.map((week, index) => (
+                <tr key={index}>
+                  {week.map(date => (
+                    <td key={date} className="px-4 py-2 border border-black dark:border-white">{date}</td>
+                  ))}
+                  {week.length < 7 && Array(7 - week.length).fill(null).map((_, idx) => (
+                    <td key={`empty-${idx}`} className="px-4 py-2 border border-black dark:border-white"></td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex-1 p-4">
+          <div className="flex space-x-2 mb-4">
+            <button className="px-4 py-2 border border-black dark:border-white">milestones</button>
+            <button className="px-4 py-2 border border-black dark:border-white">Key items</button>
+          </div>
+          <div className="border border-black dark:border-white p-4">
+            <div>Task name</div>
+            <div>depent Task</div>
+            <div>start Date</div>
+            <div>work day</div>
+          </div>
+        </div>
       </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }

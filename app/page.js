@@ -1,6 +1,7 @@
 'use client'; // 确保在文件顶部
 
 import { useState, useEffect } from 'react';
+import React from 'react'; // 导入 React 以使用 React.Fragment
 import dayjs from 'dayjs'; // 用于日期处理
 import isoWeek from 'dayjs/plugin/isoWeek'; // 插件用于处理ISO周
 dayjs.extend(isoWeek);
@@ -37,7 +38,12 @@ export default function Home() {
     let week = [];
 
     while (currentDate.isBefore(end) || currentDate.isSame(end)) {
-      week.push(currentDate.format('YYYY/MM/DD'));
+      let task = null;
+      // 如果当前日期是 Start Date，添加任务
+      if (currentDate.isSame(start, 'day')) {
+        task = 'Initiate Project';
+      }
+      week.push({ date: currentDate.format('YYYY/MM/DD'), task });
       if (week.length === 7) {
         dates.push(week);
         week = [];
@@ -116,14 +122,35 @@ export default function Home() {
             </thead>
             <tbody>
               {dates.map((week, index) => (
-                <tr key={index}>
-                  {week.map(date => (
-                    <td key={date} className="px-4 py-2 border border-black dark:border-white">{date}</td>
-                  ))}
-                  {week.length < 7 && Array(7 - week.length).fill(null).map((_, idx) => (
-                    <td key={`empty-${idx}`} className="px-4 py-2 border border-black dark:border-white"></td>
-                  ))}
-                </tr>
+                <React.Fragment key={index}>
+                  <tr>
+                    {week.map(({ date }) => (
+                      <td
+                        key={date}
+                        className={`px-4 py-2 border border-black dark:border-white ${
+                          dayjs(date).isSame(startDate, 'day') ? 'bg-green-200 dark:bg-green-700' : ''
+                        } ${
+                          dayjs(date).isSame(endDate, 'day') ? 'bg-red-200 dark:bg-red-700' : ''
+                        }`}
+                      >
+                        <div className="text-black dark:text-green-300">{date}</div>
+                      </td>
+                    ))}
+                    {week.length < 7 && Array(7 - week.length).fill(null).map((_, idx) => (
+                      <td key={`empty-${idx}`} className="px-4 py-2 border border-black dark:border-white"></td>
+                    ))}
+                  </tr>
+                  <tr>
+                    {week.map(({ date, task }) => (
+                      <td key={`task-${date}`} className="px-4 py-2 border border-black dark:border-white">
+                        {task && <div className="text-sm text-blue-500">{task}</div>}
+                      </td>
+                    ))}
+                    {week.length < 7 && Array(7 - week.length).fill(null).map((_, idx) => (
+                      <td key={`empty-task-${idx}`} className="px-4 py-2 border border-black dark:border-white"></td>
+                    ))}
+                  </tr>
+                </React.Fragment>
               ))}
             </tbody>
           </table>

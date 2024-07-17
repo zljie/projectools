@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+/* 在你的全局 CSS 文件中添加以下样式 */
+
+.kanban-container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .column {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    width: 30%;
+    padding: 16px;
+  }
+  
+  .task {
+    background-color: #ffffff;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  

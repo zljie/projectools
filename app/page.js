@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import React from 'react'; // 导入 React 以使用 React.Fragment
 import dayjs from 'dayjs'; // 用于日期处理
 import isoWeek from 'dayjs/plugin/isoWeek'; // 插件用于处理ISO周
+import Kanban from '../components/Kanban';
+import CustomCalendar from '../components/Calendar'; // 导入 CustomCalendar 组件
+
 dayjs.extend(isoWeek);
 
 export default function Home() {
@@ -26,43 +29,6 @@ export default function Home() {
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
-
-  // 获取周一日期
-  const getMonday = (date) => {
-    return date.isoWeekday(1);
-  };
-
-  // 生成从startDate到endDate的日期，并按周分组
-  const generateDates = (start, end) => {
-    const dates = [];
-    let currentDate = getMonday(start); // 从周一开始
-
-    let week = [];
-
-    while (currentDate.isBefore(end) || currentDate.isSame(end)) {
-      let task = null;
-      // 查找当前日期是否有任务
-      const taskForDate = tasks.find(task => dayjs(task.dueDate).isSame(currentDate, 'day'));
-      if (taskForDate) {
-        task = taskForDate.name;
-      }
-      week.push({ date: currentDate.format('YYYY/MM/DD'), task });
-      if (week.length === 7) {
-        dates.push(week);
-        week = [];
-      }
-      currentDate = currentDate.add(1, 'day');
-    }
-
-    if (week.length > 0) {
-      dates.push(week);
-    }
-
-    return dates;
-  };
-
-  const daysOfWeek = ['Mon', 'Tues', 'Wed', 'Thus', 'Fri', 'Sat', 'Sun'];
-  const dates = generateDates(startDate, endDate);
 
   const handleAddTask = () => {
     const { type, name, dueDate, relativeTask, relativeDays } = newTask;
@@ -136,52 +102,9 @@ export default function Home() {
         </div>
       </div>
       <div className="flex flex-1">
-        <div className="w-3/5 border-r border-black text-black dark:text-white dark:border-white p-4 overflow-y-auto" style={{ maxHeight: '90vh' }}>
-          <table className="table-auto w-full border border-black text-black dark:text-white dark:border-white">
-            <thead>
-              <tr>
-                {daysOfWeek.map(day => (
-                  <th key={day} className="px-4 py-2 border border-black text-black dark:text-white dark:border-white">{day}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {dates.map((week, index) => (
-                <React.Fragment key={index}>
-                  <tr>
-                    {week.map(({ date }) => (
-                      <td
-                        key={date}
-                        className={`px-4 py-2 border border-black text-black dark:text-white dark:border-white ${
-                          dayjs(date).isSame(startDate, 'day') ? 'bg-green-200 dark:bg-green-700' : ''
-                        } ${
-                          dayjs(date).isSame(endDate, 'day') ? 'bg-red-200 dark:bg-red-700' : ''
-                        }`}
-                      >
-                        <div className="text-black dark:text-green-300">{date}</div>
-                      </td>
-                    ))}
-                    {week.length < 7 && Array(7 - week.length).fill(null).map((_, idx) => (
-                      <td key={`empty-${idx}`} className="px-4 py-2 border border-black text-black dark:text-white dark:border-white"></td>
-                    ))}
-                  </tr>
-                  <tr>
-                    {week.map(({ date, task }, taskIndex) => {
-                      const isConnected = taskIndex > 0 && week[taskIndex - 1].task === task;
-                      return (
-                        <td key={`task-${date}`} className={`px-4 py-2 border border-black text-black dark:text-white dark:border-white ${isConnected ? 'task-connected' : ''}`}>
-                          {task && <div className="text-sm text-blue-500">{task}</div>}
-                        </td>
-                      );
-                    })}
-                    {week.length < 7 && Array(7 - week.length).fill(null).map((_, idx) => (
-                      <td key={`empty-task-${idx}`} className="px-4 py-2 border border-black text-black dark:text-white dark:border-white"></td>
-                    ))}
-                  </tr>
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+        <CustomCalendar startDate={startDate} endDate={endDate} tasks={tasks} />
+        <div className="kanban-container mt-4">
+          <Kanban />
         </div>
         <div className="w-2/5 p-4">
           <div className="border border-black text-black dark:text-white dark:border-white p-4 mb-4">

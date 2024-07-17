@@ -1,7 +1,5 @@
-// src/components/Editable/Editable.js
 import React, { useState } from 'react';
 import { Plus, X } from 'react-feather';
-import '../Editable/Editable.css';
 
 const Editable = (props) => {
   const [show, setShow] = useState(props?.handler || false);
@@ -17,10 +15,10 @@ const Editable = (props) => {
   };
 
   return (
-    <div className={`editable ${props.parentClass}`}>
+    <div className={`h-auto ${props.parentClass}`}>
       {show ? (
         <form onSubmit={handleOnSubmit}>
-          <div className={`editable__input ${props.class}`}>
+          <div className={`flex flex-col px-2 gap-2.5 ${props.class}`}>
             <textarea
               placeholder={props.placeholder}
               autoFocus
@@ -28,13 +26,17 @@ const Editable = (props) => {
               type="text"
               value={text}
               onChange={(e) => setText(e.target.value)}
+              className="w-full bg-gray-100 border-none rounded-md shadow-inner mb-3 p-2.5 transition-all focus:outline-none"
             />
-            <div className="btn__control">
-              <button className="add__btn" type="submit">
+            <div className="flex gap-1.5 items-center px-0.5">
+              <button
+                type="submit"
+                className="bg-blue-600 h-8 text-white text-sm rounded-md mb-1 hover:bg-blue-700"
+              >
                 {props.btnName || 'Add'}
               </button>
               <X
-                className="close"
+                className="hover:cursor-pointer"
                 onClick={() => {
                   setShow(false);
                   props?.setHandler(false);
@@ -44,7 +46,10 @@ const Editable = (props) => {
           </div>
         </form>
       ) : (
-        <p onClick={() => setShow(true)}>
+        <p
+          onClick={() => setShow(true)}
+          className="w-11/12 flex gap-1.5 rounded-md p-2 transition-all mx-auto hover:bg-gray-300 hover:text-black hover:cursor-pointer"
+        >
           {props.defaultValue === undefined ? <Plus /> : null}
           {props?.name || 'Add'}
         </p>

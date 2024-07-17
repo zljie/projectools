@@ -1,13 +1,13 @@
 import React from "react";
 
-import '../Tags/Tag.css'
 const Tag = (props) => {
   return (
-    // <div className='tag'>
-    <sapn className="tag" style={{ backgroundColor: `${props?.color}` }}>
+    <span
+      className="bg-blue-200 w-fit px-2 rounded-md mt-auto text-sm h-5 font-semibold text-white"
+      style={{ backgroundColor: `${props?.color}` }}
+    >
       {props?.tagName}
-    </sapn>
-    // </div>
+    </span>
   );
 };
 

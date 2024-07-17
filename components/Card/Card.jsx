@@ -1,11 +1,9 @@
-// src/components/Card/Card.js
 import React, { useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { CheckSquare, MoreHorizontal } from 'react-feather';
 import Dropdown from '../Dropdown/Dropdown';
 import Modal from '../Modal/Modal';
 import Tag from '../Tags/Tag';
-import './Card.css';
 import CardDetails from './CardDetails/CardDetails';
 
 const Card = (props) => {
@@ -27,28 +25,34 @@ const Card = (props) => {
           )}
 
           <div
-            className="custom__card"
+            className="bg-gray-100 rounded-md shadow-md mx-auto px-2 pb-1 text-gray-800 mb-2 cursor-pointer"
             onClick={() => setModalShow(true)}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             ref={provided.innerRef}
           >
-            <div className="card__text">
+            <div className="flex items-center justify-between">
               <p>{props.title}</p>
-              <MoreHorizontal className="car__more" onClick={() => setDropdown(true)} />
+              <MoreHorizontal 
+                className="opacity-50 hover:opacity-100 transition-opacity duration-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDropdown(true);
+                }}
+              />
             </div>
 
-            <div className="card__tags">
+            <div className="flex flex-wrap gap-1 mt-1">
               {props.tags?.map((item, index) => (
                 <Tag key={index} tagName={item.tagName} color={item.color} />
               ))}
             </div>
 
-            <div className="card__footer">
+            <div className="flex justify-between mt-2">
               {props.card.task.length !== 0 && (
-                <div className="task">
-                  <CheckSquare />
-                  <span>
+                <div className="flex items-center text-gray-600 text-sm">
+                  <CheckSquare className="h-4 w-4" />
+                  <span className="ml-1">
                     {props.card.task.length !== 0
                       ? `${props.card.task.filter((item) => item.completed).length} / ${props.card.task.length}`
                       : '0/0'}

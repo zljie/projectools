@@ -1,33 +1,33 @@
 import React, { useEffect, useState } from "react";
 import Card from "../Card/Card";
-import "./Board.css";
 import { MoreHorizontal } from "react-feather";
 import Editable from "../Editable/Editable";
 import Dropdown from "../Dropdown/Dropdown";
 import { Droppable } from "react-beautiful-dnd";
+
 export default function Board(props) {
   const [show, setShow] = useState(false);
   const [dropdown, setDropdown] = useState(false);
 
   useEffect(() => {
-    document.addEventListener("keypress", (e) => {
+    const handleKeyPress = (e) => {
       if (e.code === "Enter") setShow(false);
-    });
-    return () => {
-      document.removeEventListener("keypress", (e) => {
-        if (e.code === "Enter") setShow(false);
-      });
     };
-  });
+
+    document.addEventListener("keypress", handleKeyPress);
+    return () => {
+      document.removeEventListener("keypress", handleKeyPress);
+    };
+  }, []);
 
   return (
-    <div className="board">
-      <div className="board__top">
+    <div className="relative flex flex-col w-[290px] break-words bg-gray-100 border border-gray-200 rounded-md h-full max-h-[82vh] text-gray-800 min-w-[300px] mr-2">
+      <div className="flex items-center justify-between px-2 mb-0">
         {show ? (
           <div>
             <input
-              className="title__input"
-              type={"text"}
+              className="font-normal h-8 rounded-md border border-gray-300 px-2"
+              type="text"
               defaultValue={props.name}
               onChange={(e) => {
                 props.setName(e.target.value, props.id);
@@ -40,10 +40,12 @@ export default function Board(props) {
               onClick={() => {
                 setShow(true);
               }}
-              className="board__title"
+              className="font-bold cursor-pointer"
             >
               {props?.name || "Name of Board"}
-              <span className="total__cards">{props.card?.length}</span>
+              <span className="text-xs rounded-full px-2 py-0.5 border border-gray-400 bg-gray-200 ml-2">
+                {props.card?.length}
+              </span>
             </p>
           </div>
         )}
@@ -55,12 +57,17 @@ export default function Board(props) {
           <MoreHorizontal />
           {dropdown && (
             <Dropdown
-              class="board__dropdown"
+              class="shadow-lg cursor-default"
               onClose={() => {
                 setDropdown(false);
               }}
             >
-              <p onClick={() => props.removeBoard(props.id)}>Delete Board</p>
+              <p
+                className="border-b border-gray-300 cursor-pointer"
+                onClick={() => props.removeBoard(props.id)}
+              >
+                Delete Board
+              </p>
             </Dropdown>
           )}
         </div>
@@ -68,7 +75,7 @@ export default function Board(props) {
       <Droppable droppableId={props.id.toString()}>
         {(provided) => (
           <div
-            className="board__cards"
+            className="p-2 overflow-y-auto"
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
@@ -89,7 +96,7 @@ export default function Board(props) {
           </div>
         )}
       </Droppable>
-      <div className="board__footer">
+      <div className="flex flex-col">
         <Editable
           name={"Add Card"}
           btnName={"Add Card"}

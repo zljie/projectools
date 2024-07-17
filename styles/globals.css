@@ -8,26 +8,36 @@
 .kanban-container {
     display: flex;
     justify-content: space-between;
-  }
-  
-  .column {
+}
+
+.column {
     background-color: #f8f9fa;
     border-radius: 4px;
     width: 30%;
     padding: 16px;
-  }
-  
-  .task {
+}
+
+.task {
     background-color: #ffffff;
     border-radius: 4px;
     padding: 8px;
     margin-bottom: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  }
-  
+}
 
+.btn {
+    @apply font-bold py-2 px-4 rounded;
+}
 
-#top > div {
+.btn-blue {
+    @apply bg-blue-500 text-white;
+}
+
+.btn-blue:hover {
+    @apply bg-blue-700;
+}
+
+#top>div {
     height: 400px;
     width: 400px;
-  }
+}

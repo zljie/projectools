@@ -1,9 +1,7 @@
-// src/components/Card/CardDetails/CardDetails.js
 import React, { useState, useEffect } from 'react';
-import { CheckSquare, CreditCard, Tag, Trash, X } from 'react-feather';
+import { CheckSquare, CreditCard, Tag, Trash, X, Calendar } from 'react-feather';
 import Editable from '../../Editable/Editable';
 import Modal from '../../Modal/Modal';
-import './CardDetails.css';
 import { v4 as uuidv4 } from 'uuid';
 import Label from '../../Label/Label';
 
@@ -13,6 +11,7 @@ const CardDetails = (props) => {
   const [input, setInput] = useState(false);
   const [text, setText] = useState(values.title);
   const [labelShow, setLabelShow] = useState(false);
+  const [date, setDate] = useState(values.date || '');
 
   const Input = () => (
     <div>
@@ -21,6 +20,7 @@ const CardDetails = (props) => {
         defaultValue={text}
         type="text"
         onChange={(e) => setText(e.target.value)}
+        className="border rounded px-2 py-1"
       />
     </div>
   );
@@ -79,17 +79,22 @@ const CardDetails = (props) => {
     setValues({ ...values });
   };
 
-  const handelClickListner = (e) => {
+  const handleClickListener = (e) => {
     if (e.code === 'Enter') {
       setInput(false);
       updateTitle(text === '' ? values.title : text);
     }
   };
 
+  const handleDateChange = (e) => {
+    setDate(e.target.value);
+    setValues({ ...values, date: e.target.value });
+  };
+
   useEffect(() => {
-    document.addEventListener('keypress', handelClickListner);
+    document.addEventListener('keypress', handleClickListener);
     return () => {
-      document.removeEventListener('keypress', handelClickListner);
+      document.removeEventListener('keypress', handleClickListener);
     };
   }, [text]);
 
@@ -99,89 +104,85 @@ const CardDetails = (props) => {
 
   return (
     <Modal onClose={props.onClose}>
-      <div className="local__bootstrap">
-        <div className="container" style={{ minWidth: '650px', position: 'relative' }}>
-          <div className="row pb-4">
-            <div className="col-12">
-              <div className="d-flex align-items-center pt-3 gap-2">
-                <CreditCard className="icon__md" />
-                {input ? (
-                  <Input title={values.title} />
-                ) : (
-                  <h5 style={{ cursor: 'pointer' }} onClick={() => setInput(true)}>
-                    {values.title}
-                  </h5>
-                )}
-              </div>
+      <div className="p-6">
+        <div className="container mx-auto" style={{ minWidth: '650px', position: 'relative' }}>
+          <div className="pb-4">
+            <div className="flex items-center pt-3 gap-2">
+              <CreditCard className="w-6 h-6 text-gray-600" />
+              {input ? (
+                <Input title={values.title} />
+              ) : (
+                <h5 className="cursor-pointer" onClick={() => setInput(true)}>
+                  {values.title}
+                </h5>
+              )}
+              <input
+                type="date"
+                value={date}
+                onChange={handleDateChange}
+                className="border rounded px-2 py-1 ml-4"
+              />
             </div>
           </div>
-          <div className="row">
-            <div className="col-8">
-              <h6 className="text-justify">Label</h6>
-              <div className="d-flex label__color flex-wrap" style={{ width: '500px', paddingRight: '10px' }}>
+          <div className="flex">
+            <div className="w-2/3">
+              <h6 className="text-sm font-medium text-gray-700">Label</h6>
+              <div className="flex flex-wrap gap-2 mt-2">
                 {values.tags.length !== 0 ? (
                   values.tags.map((item) => (
                     <span
-                      className="d-flex justify-content-between align-items-center gap-2"
+                      className="flex justify-between items-center gap-2 px-2 py-1 rounded text-white"
                       style={{ backgroundColor: item.color }}
                       key={item.id}
                     >
                       {item.tagName.length > 10 ? `${item.tagName.slice(0, 6)}...` : item.tagName}
                       <X
                         onClick={() => removeTag(item.id)}
-                        style={{ width: '15px', height: '15px' }}
+                        className="w-4 h-4 cursor-pointer"
                       />
                     </span>
                   ))
                 ) : (
-                  <span
-                    style={{ color: '#ccc' }}
-                    className="d-flex justify-content-between align-items-center gap-2"
-                  >
-                    <i> No Labels</i>
+                  <span className="text-gray-400">
+                    <i>No Labels</i>
                   </span>
                 )}
               </div>
-              <div className="check__list mt-2">
-                <div className="d-flex align-items-end justify-content-between">
-                  <div className="d-flex align-items-center gap-2">
-                    <CheckSquare className="icon__md" />
-                    <h6>Check List</h6>
+              <div className="mt-4">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <CheckSquare className="w-6 h-6 text-gray-600" />
+                    <h6 className="text-sm font-medium text-gray-700">Check List</h6>
                   </div>
-                  <div className="card__action__btn">
-                    <button onClick={deleteAllTask}>Delete all tasks</button>
-                  </div>
+                  <button
+                    onClick={deleteAllTask}
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none"
+                  >
+                    Delete all tasks
+                  </button>
                 </div>
-                <div className="progress__bar mt-2 mb-2">
-                  <div className="progress flex-1">
-                    <div
-                      className="progress-bar"
-                      role="progressbar"
-                      style={{ width: `${calculatePercent()}%` }}
-                      aria-valuenow="75"
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    >
-                      {calculatePercent()}%
-                    </div>
-                  </div>
+                <div className="mt-2 mb-2 h-2 bg-gray-200 rounded">
+                  <div
+                    className="h-full bg-green-500 rounded"
+                    style={{ width: `${calculatePercent()}%` }}
+                  ></div>
                 </div>
                 <div className="my-2">
                   {values.task.length !== 0 ? (
                     values.task.map((item) => (
-                      <div className="task__list d-flex align-items-start gap-2" key={item.id}>
+                      <div className="flex items-center gap-2 mb-2" key={item.id}>
                         <input
-                          className="task__checkbox"
+                          className="form-checkbox h-5 w-5 text-indigo-600"
                           type="checkbox"
                           defaultChecked={item.completed}
                           onChange={() => updateTask(item.id)}
                         />
-                        <h6 className={`flex-grow-1 ${item.completed ? 'strike-through' : ''}`}>
+                        <h6 className={`flex-grow ${item.completed ? 'line-through' : ''}`}>
                           {item.task}
                         </h6>
                         <Trash
                           onClick={() => removeTask(item.id)}
-                          style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                          className="w-4 h-4 text-gray-600 cursor-pointer"
                         />
                       </div>
                     ))
@@ -195,13 +196,14 @@ const CardDetails = (props) => {
                 </div>
               </div>
             </div>
-            <div className="col-4">
-              <h6>Add to card</h6>
-              <div className="d-flex card__action__btn flex-column gap-2">
-                <button onClick={() => setLabelShow(true)}>
-                  <span className="icon__sm">
-                    <Tag />
-                  </span>
+            <div className="w-1/3 pl-4">
+              <h6 className="text-sm font-medium text-gray-700">Add to card</h6>
+              <div className="flex flex-col gap-2 mt-2">
+                <button
+                  onClick={() => setLabelShow(true)}
+                  className="flex items-center gap-2 w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none"
+                >
+                  <Tag className="w-4 h-4" />
                   Add Label
                 </button>
                 {labelShow && (
@@ -212,19 +214,20 @@ const CardDetails = (props) => {
                     onClose={setLabelShow}
                   />
                 )}
-                <button>
-                  <span className="icon__sm">
-                    <Trash />
-                  </span>
-                  Date
-                </button>
-                <button onClick={() => props.removeCard(props.bid, values.id)}>
-                  <span className="icon__sm">
-                    <Trash />
-                  </span>
+                <button
+                  onClick={() => props.removeCard(props.bid, values.id)}
+                  className="flex items-center gap-2 w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none"
+                >
+                  <Trash className="w-4 h-4" />
                   Delete Card
                 </button>
               </div>
+              {date && (
+                <div className="mt-4">
+                  <h6 className="text-sm font-medium text-gray-700">Due Date</h6>
+                  <p>{date}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

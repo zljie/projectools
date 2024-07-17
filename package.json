@@ -16,7 +16,8 @@
     "react-calendar": "^5.0.0",
     "react-dom": "^18",
     "react-feather": "^2.0.10",
-    "use-local-storage": "^3.0.0"
+    "use-local-storage": "^3.0.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "eslint": "^8",

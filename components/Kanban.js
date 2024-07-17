@@ -6,7 +6,6 @@ import Editable from './Editable/Editable';
 import { v4 as uuidv4 } from 'uuid';
 import useLocalStorage from 'use-local-storage';
 import Navbar from './Navbar/Navbar';
-import './Kanban.css';
 
 const Kanban = () => {
   const [data, setData] = useState([]);
@@ -16,6 +15,16 @@ const Kanban = () => {
     const storedData = localStorage.getItem('kanban-board');
     if (storedData) {
       setData(JSON.parse(storedData));
+    } else {
+      // 初始化5个默认的 Board
+      const initialBoards = [
+        { id: uuidv4(), boardName: 'Backlog', card: [] },
+        { id: uuidv4(), boardName: 'Todo', card: [] },
+        { id: uuidv4(), boardName: 'In Progress', card: [] },
+        { id: uuidv4(), boardName: 'Review', card: [] },
+        { id: uuidv4(), boardName: 'Done', card: [] },
+      ];
+      setData(initialBoards);
     }
   }, []);
 
@@ -107,10 +116,10 @@ const Kanban = () => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="Kanban" data-theme={theme}>
+      <div className={`Kanban ${theme === 'light' ? 'bg-white' : 'bg-gray-800'} transition-all duration-350`} data-theme={theme}>
         <Navbar switchTheme={switchTheme} />
-        <div className="kanban_outer">
-          <div className="kanban_boards">
+        <div className="flex flex-col min-h-screen">
+          <div className="flex flex-row gap-8 mt-5 p-8 overflow-x-auto">
             {data.map((item) => (
               <Board
                 key={item.id}
@@ -125,7 +134,7 @@ const Kanban = () => {
               />
             ))}
             <Editable
-              className="add__board"
+              className="add__board border border-gray-400 h-8"
               name="Add Board"
               btnName="Add Board"
               onSubmit={addBoard}

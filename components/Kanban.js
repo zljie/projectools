@@ -1,3 +1,12 @@
+// src/components/Kanban/Kanban.js
+import React, { useState, useEffect } from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
+import Board from './Board/Board';
+import Editable from './Editable/Editable';
+import { v4 as uuidv4 } from 'uuid';
+import useLocalStorage from 'use-local-storage';
+import Navbar from './Navbar/Navbar';
+
 const Kanban = () => {
   const [data, setData] = useState([]);
   const [theme, setTheme] = useLocalStorage('theme', 'light');
@@ -137,7 +146,6 @@ const Kanban = () => {
     </DragDropContext>
   );
 };
-
 Kanban.displayName = 'Kanban';
 
 export default Kanban;

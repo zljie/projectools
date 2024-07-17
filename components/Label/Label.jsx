@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Check, X } from "react-feather";
 
-export default function (props) {
+const Label = (props) => {
   const input = useRef();
   const [selectedColor, setSelectedColor] = useState("");
   const [label, setLabel] = useState("");
@@ -70,4 +70,8 @@ export default function (props) {
       </div>
     </div>
   );
-}
+};
+
+Label.displayName = 'Label';
+
+export default Label;

@@ -10,7 +10,7 @@ import './Kanban.css';
 
 const Kanban = () => {
   const [data, setData] = useState([]);
-  const [theme, setTheme] = useLocalStorage('theme',  'light');
+  const [theme, setTheme] = useLocalStorage('theme', 'light');
 
   useEffect(() => {
     const storedData = localStorage.getItem('kanban-board');
@@ -18,6 +18,10 @@ const Kanban = () => {
       setData(JSON.parse(storedData));
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('kanban-board', JSON.stringify(data));
+  }, [data]);
 
   const switchTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -100,10 +104,6 @@ const Kanban = () => {
     tempBoards[index].card[cardIndex] = card;
     setData(tempBoards);
   };
-
-  useEffect(() => {
-    localStorage.setItem('kanban-board', JSON.stringify(data));
-  }, [data]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>

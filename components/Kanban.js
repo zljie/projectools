@@ -1,120 +1,108 @@
 // components/Kanban.js
 
 import React, { useState } from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import Column from './Column';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-// 初始数据
-const initialData = {
-  tasks: {
-    'task-1': { id: 'task-1', content: 'Take out the garbage' },
-    'task-2': { id: 'task-2', content: 'Watch my favorite show' },
-    'task-3': { id: 'task-3', content: 'Charge my phone' },
-    'task-4': { id: 'task-4', content: 'Cook dinner' },
+const initialColumns = {
+  backlog: {
+    name: 'Backlog',
+    items: []
   },
-  columns: {
-    'column-1': {
-      id: 'column-1',
-      title: 'To do',
-      taskIds: ['task-1', 'task-2', 'task-3', 'task-4'],
-    },
-    'column-2': {
-      id: 'column-2',
-      title: 'In progress',
-      taskIds: [],
-    },
-    'column-3': {
-      id: 'column-3',
-      title: 'Done',
-      taskIds: [],
-    },
+  todo: {
+    name: 'Todo',
+    items: []
   },
-  columnOrder: ['column-1', 'column-2', 'column-3'],
+  inProgress: {
+    name: 'In Progress',
+    items: []
+  },
+  review: {
+    name: 'Review',
+    items: []
+  },
+  done: {
+    name: 'Done',
+    items: []
+  }
 };
 
 const Kanban = () => {
-  const [state, setState] = useState(initialData);
+  const [columns, setColumns] = useState(initialColumns);
 
-  const onDragEnd = (result) => {
-    const { destination, source, draggableId } = result;
+  const onDragEnd = (result, columns, setColumns) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
 
-    // 如果没有目的地，则返回
-    if (!destination) {
-      return;
-    }
-
-    // 如果任务回到原位，则返回
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    const start = state.columns[source.droppableId];
-    const finish = state.columns[destination.droppableId];
-
-    // 如果任务在同一列内拖动
-    if (start === finish) {
-      const newTaskIds = Array.from(start.taskIds);
-      newTaskIds.splice(source.index, 1);
-      newTaskIds.splice(destination.index, 0, draggableId);
-
-      const newColumn = {
-        ...start,
-        taskIds: newTaskIds,
-      };
-
-      const newState = {
-        ...state,
-        columns: {
-          ...state.columns,
-          [newColumn.id]: newColumn,
+    if (source.droppableId !== destination.droppableId) {
+      const sourceColumn = columns[source.droppableId];
+      const destColumn = columns[destination.droppableId];
+      const sourceItems = [...sourceColumn.items];
+      const destItems = [...destColumn.items];
+      const [removed] = sourceItems.splice(source.index, 1);
+      destItems.splice(destination.index, 0, removed);
+      setColumns({
+        ...columns,
+        [source.droppableId]: {
+          ...sourceColumn,
+          items: sourceItems
         },
-      };
-
-      setState(newState);
-      return;
+        [destination.droppableId]: {
+          ...destColumn,
+          items: destItems
+        }
+      });
+    } else {
+      const column = columns[source.droppableId];
+      const copiedItems = [...column.items];
+      const [removed] = copiedItems.splice(source.index, 1);
+      copiedItems.splice(destination.index, 0, removed);
+      setColumns({
+        ...columns,
+        [source.droppableId]: {
+          ...column,
+          items: copiedItems
+        }
+      });
     }
-
-    // 如果任务在不同列之间拖动
-    const startTaskIds = Array.from(start.taskIds);
-    startTaskIds.splice(source.index, 1);
-    const newStart = {
-      ...start,
-      taskIds: startTaskIds,
-    };
-
-    const finishTaskIds = Array.from(finish.taskIds);
-    finishTaskIds.splice(destination.index, 0, draggableId);
-    const newFinish = {
-      ...finish,
-      taskIds: finishTaskIds,
-    };
-
-    const newState = {
-      ...state,
-      columns: {
-        ...state.columns,
-        [newStart.id]: newStart,
-        [newFinish.id]: newFinish,
-      },
-    };
-
-    setState(newState);
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex">
-        {state.columnOrder.map((columnId) => {
-          const column = state.columns[columnId];
-          const tasks = column.taskIds.map((taskId) => state.tasks[taskId]);
-
-          return <Column key={column.id} column={column} tasks={tasks} />;
+    <div className="flex space-x-4">
+      <DragDropContext onDragEnd={result => onDragEnd(result, columns, setColumns)}>
+        {Object.entries(columns).map(([columnId, column], index) => {
+          return (
+            <div key={columnId} className="flex flex-col w-1/5">
+              <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">{column.name}</h2>
+              <Droppable droppableId={columnId}>
+                {(provided, snapshot) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className={`p-4 border border-black dark:border-white rounded-md shadow-sm bg-white dark:bg-gray-700 ${snapshot.isDraggingOver ? 'bg-blue-100' : ''}`}
+                  >
+                    {column.items.map((item, index) => (
+                      <Draggable key={item.id} draggableId={item.id} index={index}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`p-4 mb-2 border border-black dark:border-white rounded-md shadow-sm bg-white dark:bg-gray-700 ${snapshot.isDragging ? 'bg-blue-100' : ''}`}
+                          >
+                            {item.content}
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          );
         })}
-      </div>
-    </DragDropContext>
+      </DragDropContext>
+    </div>
   );
 };
 

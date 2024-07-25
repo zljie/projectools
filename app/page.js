@@ -1,21 +1,23 @@
 'use client'; // 确保在文件顶部
 
+// src/components/HomeContent.js
 import { useState, useEffect } from 'react';
-import React from 'react'; // 导入 React 以使用 React.Fragment
-import dayjs from 'dayjs'; // 用于日期处理
-import isoWeek from 'dayjs/plugin/isoWeek'; // 插件用于处理ISO周
+import React from 'react';
+import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
 import Kanban from '../components/Kanban';
-import CustomCalendar from '../components/Calendar'; // 导入 CustomCalendar 组件
-import Layout from '../components/Layout'; // 导入 Layout 组件
-import AddNewEvent from '../components/AddNewEvent'; // 导入 AddNewEvent 组件
+import CustomCalendar from '../components/Calendar';
+import Layout from '../components/Layout';
+import AddNewEvent from '../components/AddNewEvent';
+import { ProjectProvider, useProject } from '../dao/ProjectContext'; 
 
 dayjs.extend(isoWeek);
 
-export default function Home() {
+const HomeContent = () => {
+  const { state, dispatch } = useProject();
+  const { project, milestone } = state;
+
   const [theme, setTheme] = useState('light');
-  const [projectName, setProjectName] = useState(''); // 项目名称状态
-  const [startDate, setStartDate] = useState(dayjs('2024-07-03')); // 项目开始日期状态
-  const [endDate, setEndDate] = useState(dayjs('2024-09-10')); // 项目结束日期状态，调整为 10 周后
   const [tasks, setTasks] = useState([]); // 任务状态
 
   // 切换主题
@@ -36,6 +38,33 @@ export default function Home() {
     setTasks(newTasks);
   };
 
+  // 计算相对日期并格式化里程碑数据
+  const calculateDueDate = (milestone, allMilestones) => {
+    if (milestone.Type === 'relative') {
+      const relativeTask = allMilestones.find(ms => ms.MilestoneId === milestone.RelativeTaskId);
+      if (relativeTask) {
+        return dayjs(relativeTask.DueDate).add(milestone.RelativeDate, 'day').format('YYYY-MM-DD');
+      }
+    }
+    return milestone.DueDate ? dayjs(milestone.DueDate).format('YYYY-MM-DD') : null;
+  };
+
+  const formattedMilestones = milestone.map(ms => ({
+    ...ms,
+    date: calculateDueDate(ms, milestone)
+  }));
+
+  // 合并任务和里程碑数据
+  const combinedTasks = [
+    ...tasks,
+    ...formattedMilestones.map(ms => ({
+      ...ms,
+      dueDate: ms.date,
+      name: ms.MilestoneName, // 确保所有数据有一个统一的 name 字段
+      type: 'milestone'
+    }))
+  ];
+
   return (
     <Layout>
       {/* Project Info */}
@@ -47,8 +76,8 @@ export default function Home() {
           <input
             type="text"
             id="projectName"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
+            value={project.name || ""}
+            onChange={(e) => dispatch({ type: 'UPDATE_PROJECT', payload: { name: e.target.value } })}
             className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black dark:text-white dark:border-white"
           />
         </div>
@@ -59,8 +88,8 @@ export default function Home() {
           <input
             type="date"
             id="startDate"
-            value={startDate.format('YYYY-MM-DD')}
-            onChange={(e) => setStartDate(dayjs(e.target.value))}
+            value={project.startdate ? dayjs(project.startdate).format('YYYY-MM-DD') : ""}
+            onChange={(e) => dispatch({ type: 'UPDATE_PROJECT', payload: { startdate: e.target.value } })}
             className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black dark:text-white dark:border-white"
           />
         </div>
@@ -71,8 +100,8 @@ export default function Home() {
           <input
             type="date"
             id="endDate"
-            value={endDate.format('YYYY-MM-DD')}
-            onChange={(e) => setEndDate(dayjs(e.target.value))}
+            value={project.enddate ? dayjs(project.enddate).format('YYYY-MM-DD') : ""}
+            onChange={(e) => dispatch({ type: 'UPDATE_PROJECT', payload: { enddate: e.target.value } })}
             className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black dark:text-white dark:border-white"
           />
         </div>
@@ -89,7 +118,7 @@ export default function Home() {
 
       {/* Calendar */}
       <div className="w-1/4 h-400">
-        <CustomCalendar startDate={startDate} endDate={endDate} tasks={tasks} />
+        <CustomCalendar startDate={dayjs(project.startdate)} endDate={dayjs(project.enddate)} tasks={combinedTasks} />
       </div>
 
       {/* TBD List */}
@@ -107,14 +136,19 @@ export default function Home() {
         </div>
         <div className="border border-black text-black dark:text-white dark:border-white p-4">
           <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4">Milestones</h3>
-          {tasks.map((task, index) => (
+          {formattedMilestones.map((ms, index) => (
             <div key={index} className="mb-2 flex justify-between items-center">
               <div>
-                <div>Task: {task.name}</div>
-                <div>Due Date: {dayjs(task.dueDate).format('YYYY-MM-DD')}</div>
+                <div>Milestone Name: {ms.MilestoneName}</div>
+                <div>Type: {ms.Type}</div>
+                <div>Due Date: {ms.date}</div>
+                {ms.RelativeDate && <div>Relative Date: {ms.RelativeDate}</div>}
+                {ms.RelativeTaskId && <div>Relative Task ID: {ms.RelativeTaskId}</div>}
+                <div>Labels: {ms.label.join(', ')}</div>
+                <div>Status: {ms.Status}</div>
               </div>
               <button
-                onClick={() => handleDeleteTask(index)}
+                onClick={() => dispatch({ type: 'DELETE_MILESTONE', payload: ms.MilestoneId })}
                 className="px-2 py-1 border border-black text-black dark:text-white dark:border-white text-red-500"
               >
                 Delete
@@ -137,8 +171,16 @@ export default function Home() {
 
       {/* Kanban */}
       <div className="flex-1">
-        <Kanban />
+        <Kanban milestones={formattedMilestones} />
       </div>
     </Layout>
+  );
+}
+
+export default function Home() {
+  return (
+    <ProjectProvider>
+      <HomeContent />
+    </ProjectProvider>
   );
 }

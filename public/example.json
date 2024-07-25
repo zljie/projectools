@@ -1,0 +1,31 @@
+{
+    "project": {
+        "name": "abc",
+        "startdate": "2024-7-1",
+        "enddate": "2024-7-30"
+    },
+    "milestone": [
+        {
+            "MilestoneName": "kaigong",
+            "Type": "static",
+            "DueDate": "2024-7-3",
+            "MilestoneId": "adsfasdfas",
+            "label": [
+                "bcc"
+            ],
+            "Status":"Done"
+        },
+        {
+            "MilestoneName": "qiaoqiang",
+            "Type": "relative",
+            "RelativeDate": "5",
+            "DueDate": "2024-7-8",
+            "RelativeTaskId": "adsfasdfas",
+            "MilestoneId": "qereewerwer",
+            "label": [
+                "bcc"
+            ],
+            "Status":"In Progress"
+        }
+    ]
+}

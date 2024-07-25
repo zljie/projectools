@@ -7,26 +7,41 @@ import { v4 as uuidv4 } from 'uuid';
 import useLocalStorage from 'use-local-storage';
 import Navbar from './Navbar/Navbar';
 
-const Kanban = () => {
+const Kanban = ({ milestones }) => {
   const [data, setData] = useState([]);
   const [theme, setTheme] = useLocalStorage('theme', 'light');
 
+  
+
   useEffect(() => {
-    const storedData = localStorage.getItem('kanban-board');
-    if (storedData) {
-      setData(JSON.parse(storedData));
-    } else {
-      // 初始化5个默认的 Board
-      const initialBoards = [
+    if (milestones && milestones.length > 0) {
+      const updatedData = [
         { id: uuidv4(), boardName: 'Backlog', card: [] },
         { id: uuidv4(), boardName: 'Todo', card: [] },
         { id: uuidv4(), boardName: 'In Progress', card: [] },
         { id: uuidv4(), boardName: 'Review', card: [] },
         { id: uuidv4(), boardName: 'Done', card: [] },
       ];
-      setData(initialBoards);
+
+      milestones.forEach(ms => {
+        const boardIndex = updatedData.findIndex(board => board.boardName === ms.Status);
+        if (boardIndex !== -1) {
+          updatedData[boardIndex].card.push({
+            id: ms.MilestoneId,
+            title: ms.MilestoneName,
+            tags: ms.label,
+            task: [],
+            dueDate: ms.date,
+            type: ms.Type,
+            relativeDate: ms.RelativeDate,
+            relativeTaskId: ms.RelativeTaskId
+          });
+        }
+      });
+
+      setData(updatedData);
     }
-  }, []);
+  }, [milestones]);
 
   useEffect(() => {
     localStorage.setItem('kanban-board', JSON.stringify(data));

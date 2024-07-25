@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CheckSquare, CreditCard, Tag, Trash, X, Calendar } from 'react-feather';
 import Editable from '../../Editable/Editable';
 import Modal from '../../Modal/Modal';
@@ -6,8 +6,10 @@ import { v4 as uuidv4 } from 'uuid';
 import Label from '../../Label/Label';
 
 const CardDetails = (props) => {
+  const { card, updateCard, onClose, removeCard, bid } = props;
+
   const colors = ['#61bd4f', '#f2d600', '#ff9f1a', '#eb5a46', '#c377e0'];
-  const [values, setValues] = useState({ ...props.card });
+  const [values, setValues] = useState({ ...card });
   const [input, setInput] = useState(false);
   const [text, setText] = useState(values.title);
   const [labelShow, setLabelShow] = useState(false);
@@ -52,9 +54,9 @@ const CardDetails = (props) => {
     setValues({ ...values });
   };
 
-  const updateTitle = (value) => {
-    setValues({ ...values, title: value });
-  };
+  const updateTitle = useCallback((value) => {
+    setValues((prevValues) => ({ ...prevValues, title: value }));
+  }, []);
 
   const calculatePercent = () => {
     const totalTask = values.task.length;
@@ -79,12 +81,12 @@ const CardDetails = (props) => {
     setValues({ ...values });
   };
 
-  const handleClickListener = (e) => {
+  const handleClickListener = useCallback((e) => {
     if (e.code === 'Enter') {
       setInput(false);
       updateTitle(text === '' ? values.title : text);
     }
-  };
+  }, [text, values.title, updateTitle]);
 
   const handleDateChange = (e) => {
     setDate(e.target.value);
@@ -96,14 +98,14 @@ const CardDetails = (props) => {
     return () => {
       document.removeEventListener('keypress', handleClickListener);
     };
-  }, [text]);
+  }, [handleClickListener]);
 
   useEffect(() => {
-    if (props.updateCard) props.updateCard(props.bid, values.id, values);
-  }, [values]);
+    if (updateCard) updateCard(bid, values.id, values);
+  }, [values, updateCard, bid]);
 
   return (
-    <Modal onClose={props.onClose}>
+    <Modal onClose={onClose}>
       <div className="p-6">
         <div className="container mx-auto" style={{ minWidth: '650px', position: 'relative' }}>
           <div className="pb-4">
@@ -215,7 +217,7 @@ const CardDetails = (props) => {
                   />
                 )}
                 <button
-                  onClick={() => props.removeCard(props.bid, values.id)}
+                  onClick={() => removeCard(bid, values.id)}
                   className="flex items-center gap-2 w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none"
                 >
                   <Trash className="w-4 h-4" />

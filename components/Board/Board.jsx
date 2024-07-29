@@ -1,7 +1,7 @@
+// src/components/Kanban/Board/Board.js
 import React, { useEffect, useState } from "react";
 import Card from "../Card/Card";
 import { MoreHorizontal } from "react-feather";
-import Editable from "../Editable/Editable";
 import Dropdown from "../Dropdown/Dropdown";
 import { Droppable } from "react-beautiful-dnd";
 
@@ -97,12 +97,12 @@ export default function Board(props) {
         )}
       </Droppable>
       <div className="flex flex-col">
-        <Editable
-          name={"Add Card"}
-          btnName={"Add Card"}
-          placeholder={"Enter Card Title"}
-          onSubmit={(value) => props.addCard(value, props.id)}
-        />
+        <button
+          className="mt-2 px-4 py-2 border border-black text-black dark:text-white dark:border-white"
+          onClick={() => props.handleAddCard(props.id)}
+        >
+          Add Card
+        </button>
       </div>
     </div>
   );

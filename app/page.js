@@ -8,7 +8,7 @@ import isoWeek from 'dayjs/plugin/isoWeek';
 import Kanban from '../components/Kanban';
 import CustomCalendar from '../components/Calendar';
 import Layout from '../components/Layout';
-import AddNewEvent from '../components/AddNewEvent';
+
 import { ProjectProvider, useProject } from '../dao/ProjectContext'; 
 
 dayjs.extend(isoWeek);
@@ -43,27 +43,21 @@ const HomeContent = () => {
     if (milestone.Type === 'relative') {
       const relativeTask = allMilestones.find(ms => ms.MilestoneId === milestone.RelativeTaskId);
       if (relativeTask) {
-        return dayjs(relativeTask.DueDate).add(milestone.RelativeDate, 'day').format('YYYY-MM-DD');
+        return dayjs(relativeTask.dueDate).add(milestone.RelativeDate, 'day').format('YYYY-MM-DD');
       }
     }
     return milestone.DueDate ? dayjs(milestone.DueDate).format('YYYY-MM-DD') : null;
   };
 
-  const formattedMilestones = milestone.map(ms => ({
-    ...ms,
-    date: calculateDueDate(ms, milestone)
-  }));
-
-  // 合并任务和里程碑数据
-  const combinedTasks = [
-    ...tasks,
-    ...formattedMilestones.map(ms => ({
+  useEffect(() => {
+    const formattedMilestones = milestone.map(ms => ({
       ...ms,
-      dueDate: ms.date,
+      dueDate: calculateDueDate(ms, milestone),
       name: ms.MilestoneName, // 确保所有数据有一个统一的 name 字段
       type: 'milestone'
-    }))
-  ];
+    }));
+    setTasks(formattedMilestones); // 只设置一次里程碑数据
+  }, [milestone]);
 
   return (
     <Layout>
@@ -118,7 +112,7 @@ const HomeContent = () => {
 
       {/* Calendar */}
       <div className="w-1/4 h-400">
-        <CustomCalendar startDate={dayjs(project.startdate)} endDate={dayjs(project.enddate)} tasks={combinedTasks} />
+        <CustomCalendar startDate={dayjs(project.startdate)} endDate={dayjs(project.enddate)} tasks={tasks} />
       </div>
 
       {/* TBD List */}
@@ -131,20 +125,16 @@ const HomeContent = () => {
 
       {/* Milestone List */}
       <div className="w-1/4 h-400 relative">
-        <div className="absolute top-0 right-0">
-          <AddNewEvent tasks={tasks} setTasks={setTasks} />
-        </div>
         <div className="border border-black text-black dark:text-white dark:border-white p-4">
           <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4">Milestones</h3>
-          {formattedMilestones.map((ms, index) => (
+          {tasks.filter(task => task.type === 'milestone').map((ms, index) => (
             <div key={index} className="mb-2 flex justify-between items-center">
               <div>
-                <div>Milestone Name: {ms.MilestoneName}</div>
+                <div>Milestone Name: {ms.name}</div>
                 <div>Type: {ms.Type}</div>
-                <div>Due Date: {ms.date}</div>
+                <div>Due Date: {ms.dueDate}</div>
                 {ms.RelativeDate && <div>Relative Date: {ms.RelativeDate}</div>}
                 {ms.RelativeTaskId && <div>Relative Task ID: {ms.RelativeTaskId}</div>}
-                <div>Labels: {ms.label.join(', ')}</div>
                 <div>Status: {ms.Status}</div>
               </div>
               <button
@@ -171,11 +161,11 @@ const HomeContent = () => {
 
       {/* Kanban */}
       <div className="flex-1">
-        <Kanban milestones={formattedMilestones} />
+        <Kanban milestones={tasks.filter(task => task.type === 'milestone')} />
       </div>
     </Layout>
   );
-}
+};
 
 export default function Home() {
   return (

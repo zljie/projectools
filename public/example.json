@@ -9,10 +9,7 @@
             "MilestoneName": "kaigong",
             "Type": "static",
             "DueDate": "2024-7-3",
-            "MilestoneId": "adsfasdfas",
-            "label": [
-                "bcc"
-            ],
+            "MilestoneId": "adsfasdfas",        
             "Status":"Done"
         },
         {
@@ -22,10 +19,25 @@
             "DueDate": "2024-7-8",
             "RelativeTaskId": "adsfasdfas",
             "MilestoneId": "qereewerwer",
-            "label": [
-                "bcc"
-            ],
             "Status":"In Progress"
+        },
+        {
+            "MilestoneName": "work1",
+            "Type": "relative",
+            "RelativeDate": "2",
+            "DueDate": "2024-7-5",
+            "RelativeTaskId": "adsfasdfas",
+            "MilestoneId": "qeree98rwer",
+            "Status":"Todo"
+        },
+        {
+            "MilestoneName": "work2",
+            "Type": "relative",
+            "RelativeDate": "5",
+            "DueDate": "2024-7-8",
+            "RelativeTaskId": "adsfasdfas",
+            "MilestoneId": "o1reewerwer",
+            "Status":"Todo"
         }
     ]
 }

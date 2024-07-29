@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { CheckSquare, MoreHorizontal } from 'react-feather';
-import Dropdown from '../Dropdown/Dropdown';
-import Modal from '../Modal/Modal';
 import Tag from '../Tags/Tag';
 import CardDetails from './CardDetails/CardDetails';
 

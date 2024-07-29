@@ -20,10 +20,7 @@ const projectReducer = (state, action) => {
     case "ADD_MILESTONE":
       return {
         ...state,
-        milestones: [
-          ...state.milestones,
-          { ...action.payload, MilestoneId: uuidv4() },
-        ],
+        milestones: [...state.milestones, action.payload],
       };
     case "UPDATE_MILESTONE":
       return {
